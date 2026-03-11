@@ -1,0 +1,116 @@
+{
+  "en": [
+    {
+      "snr_db": null,
+      "per_mean": 3.389239,
+      "per_std": 0.338666
+    },
+    {
+      "snr_db": -5,
+      "per_mean": 1.014,
+      "per_std": 0.07562
+    },
+    {
+      "snr_db": 0,
+      "per_mean": 1.547913,
+      "per_std": 0.310488
+    },
+    {
+      "snr_db": 5,
+      "per_mean": 2.230258,
+      "per_std": 0.401369
+    },
+    {
+      "snr_db": 10,
+      "per_mean": 2.952981,
+      "per_std": 0.353943
+    },
+    {
+      "snr_db": 15,
+      "per_mean": 3.230803,
+      "per_std": 0.315522
+    },
+    {
+      "snr_db": 20,
+      "per_mean": 3.324941,
+      "per_std": 0.33485
+    },
+    {
+      "snr_db": 25,
+      "per_mean": 3.35388,
+      "per_std": 0.32656
+    },
+    {
+      "snr_db": 30,
+      "per_mean": 3.377913,
+      "per_std": 0.330532
+    },
+    {
+      "snr_db": 35,
+      "per_mean": 3.386693,
+      "per_std": 0.328428
+    },
+    {
+      "snr_db": 40,
+      "per_mean": 3.390937,
+      "per_std": 0.330901
+    }
+  ],
+  "fr": [
+    {
+      "snr_db": null,
+      "per_mean": 3.34536,
+      "per_std": 0.346553
+    },
+    {
+      "snr_db": -5,
+      "per_mean": 1.010452,
+      "per_std": 0.054492
+    },
+    {
+      "snr_db": 0,
+      "per_mean": 1.556563,
+      "per_std": 0.317592
+    },
+    {
+      "snr_db": 5,
+      "per_mean": 2.218596,
+      "per_std": 0.403948
+    },
+    {
+      "snr_db": 10,
+      "per_mean": 2.929498,
+      "per_std": 0.35138
+    },
+    {
+      "snr_db": 15,
+      "per_mean": 3.189787,
+      "per_std": 0.337268
+    },
+    {
+      "snr_db": 20,
+      "per_mean": 3.290949,
+      "per_std": 0.347364
+    },
+    {
+      "snr_db": 25,
+      "per_mean": 3.314823,
+      "per_std": 0.350122
+    },
+    {
+      "snr_db": 30,
+      "per_mean": 3.334547,
+      "per_std": 0.325632
+    },
+    {
+      "snr_db": 35,
+      "per_mean": 3.341055,
+      "per_std": 0.334751
+    },
+    {
+      "snr_db": 40,
+      "per_mean": 3.345517,
+      "per_std": 0.341708
+    }
+  ]
+}

@@ -2,6 +2,7 @@
 dvc>=3.0.0
 numpy>=1.24
 soundfile>=0.12
+librosa>=0.10
 scipy>=1.10
 pyyaml>=6.0
 
@@ -13,5 +14,5 @@ datasets>=2.18
 # Plotting
 matplotlib>=3.7
 
-# Data download (optional – only for setup_data.py)
-# huggingface_hub>=0.20
+# Data download
+huggingface_hub>=0.20

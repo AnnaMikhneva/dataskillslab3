@@ -26,7 +26,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
-
+from typing import Optional
 import numpy as np
 import soundfile as sf
 import yaml
@@ -58,7 +58,7 @@ def add_noise_to_file(
     input_wav: str,
     output_wav: str,
     snr_db: float,
-    seed: int | None = None,
+    seed: Optional[int] = None,
 ) -> None:
     signal, sr = sf.read(input_wav)
     if signal.ndim != 1:
