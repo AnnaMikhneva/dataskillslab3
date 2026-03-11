@@ -1,22 +1,5 @@
 #!/usr/bin/env python3
-"""
-Stage 2 – add_noise
-====================
-Reads a clean manifest, generates noisy variants of every utterance at the
-SNR levels specified in params.yaml, writes the noisy WAV files, and emits
-one manifest per SNR level – all atomically.
 
-Usage:
-    python src/add_noise.py --lang en --params params.yaml
-
-Inputs:
-    - data/manifests/{lang}/clean.jsonl
-    - params.yaml
-
-Outputs:
-    - data/noisy/{lang}/snr_{snr_db}/wav/*.wav
-    - data/manifests/{lang}/noisy_snr_{snr_db}.jsonl   (written atomically)
-"""
 
 import argparse
 import hashlib
@@ -38,9 +21,7 @@ logging.basicConfig(
 log = logging.getLogger("add_noise")
 
 
-# ---------------------------------------------------------------------------
-# Noise addition (provided by lab)
-# ---------------------------------------------------------------------------
+# Noise addition
 
 def add_noise(
     signal: np.ndarray,
@@ -68,9 +49,6 @@ def add_noise_to_file(
     sf.write(output_wav, noisy_signal, sr)
 
 
-# ---------------------------------------------------------------------------
-# Manifest I/O
-# ---------------------------------------------------------------------------
 
 def load_manifest(path: Path) -> list:
     records = []
@@ -110,10 +88,6 @@ def write_manifest_atomically(records: list, output_path: Path) -> None:
             pass
         raise
 
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
 
 def main():
     parser = argparse.ArgumentParser(description="Add noise to audio at multiple SNR levels.")
@@ -175,7 +149,7 @@ def main():
         if errors > 0:
             log.warning("SNR=%s dB: %d errors encountered", snr_db, errors)
 
-        # Write manifest atomically only after all files are produced
+        # Writing manifest atomically only after all files are produced
         manifest_out = manifest_dir / f"noisy_snr_{snr_db}.jsonl"
         write_manifest_atomically(noisy_records, manifest_out)
 
