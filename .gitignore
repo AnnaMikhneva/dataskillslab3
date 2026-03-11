@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.env
+venv/
+.venv/
+
+# DVC cache (tracked by DVC, not git)
+/data/raw/
+/data/noisy/
+/data/predictions/
+/**/*.dvc
+!/.dvc
+# But DO track manifests in git (lightweight JSONL)
+# Uncomment to also exclude manifests from git:
+# /data/manifests/
+
+# Figures and metrics are declared as DVC outputs/metrics
+# They are NOT gitignored here so they can be viewed in the repo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

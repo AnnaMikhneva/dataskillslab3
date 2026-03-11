@@ -1,0 +1,28 @@
+# ============================================================
+# Central parameter file for the DVC phoneme pipeline
+# Add a language by appending to `languages` - no code changes needed.
+# ============================================================
+
+languages:
+  - en
+  - fr
+
+noise:
+  snr_levels: [-5, 0, 5, 10, 15, 20, 25, 30, 35, 40]
+  seed: 42                    # global RNG seed for reproducibility
+
+model:
+  name: "facebook/wav2vec2-lv-60-espeak-cv-ft"
+  target_sr: 16000            # wav2vec2 requires 16 kHz mono
+  batch_size: 8
+
+data:
+  # Paths are relative to the project root
+  raw_dir: "data/raw"
+  manifest_dir: "data/manifests"
+  noisy_dir: "data/noisy"
+  predictions_dir: "data/predictions"
+  metrics_dir: "metrics"
+  figures_dir: "figures"
+  # Maximum utterances per language (null = use all)
+  max_utterances: null
