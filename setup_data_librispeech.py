@@ -1,4 +1,3 @@
-# save as setup_data_librispeech.py
 from datasets import load_dataset
 from pathlib import Path
 import soundfile as sf
@@ -21,7 +20,7 @@ with open("params.yaml") as f:
 
 raw_dir = Path(params["data"]["raw_dir"])
 
-# For French — replace the ds line above with:
+# For French 
 ds = load_dataset("facebook/multilingual_librispeech", "french", split="test", streaming=True, trust_remote_code=True)
 
 for lang in params["languages"]:
@@ -40,7 +39,6 @@ for lang in params["languages"]:
 
         stem = f"ls_{lang}_{count:06d}"
         sf.write(str(wav_dir / f"{stem}.wav"), signal, 16000)
-# Try both field names — librispeech_asr uses 'text', multilingual_librispeech uses 'sentence'
         transcript = item.get("text") or item.get("sentence") or item.get("transcript", "")
         texts.append(f"{stem}\t{transcript.lower()}")
         count += 1

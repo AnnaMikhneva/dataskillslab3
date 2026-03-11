@@ -1,21 +1,5 @@
 #!/usr/bin/env python3
-"""
-Stage 1 – prepare_manifests
-============================
-Downloads (or expects) raw audio for each language, converts reference text to
-phonemes using espeak-ng, and writes a clean manifest atomically.
 
-Usage:
-    python src/prepare_manifests.py --lang en --params params.yaml
-
-Inputs:
-    - data/raw/{lang}/wav/*.wav   (pre-downloaded audio)
-    - data/raw/{lang}/text.tsv    (tab-separated: filename\\tref_text)
-    - params.yaml
-
-Outputs:
-    - data/manifests/{lang}/clean.jsonl   (written atomically)
-"""
 
 import argparse
 import hashlib
@@ -37,9 +21,7 @@ logging.basicConfig(
 log = logging.getLogger("prepare_manifests")
 
 
-# ---------------------------------------------------------------------------
 # Helpers
-# ---------------------------------------------------------------------------
 
 def load_params(params_path: str) -> dict:
     with open(params_path) as f:
@@ -78,7 +60,7 @@ def text_to_phonemes(text: str, lang: str) -> str:
             check=True,
             timeout=30,
         )
-        # espeak-ng prefixes each line with spaces; strip and join lines
+        # espeak-ng prefixes each line with spaces
         phonemes = " ".join(
             line.strip() for line in result.stdout.splitlines() if line.strip()
         )
@@ -94,10 +76,7 @@ def text_to_phonemes(text: str, lang: str) -> str:
 
 
 def load_text_references(text_tsv: Path) -> dict:
-    """
-    Load tab-separated reference file: stem\\tref_text
-    Returns dict mapping stem -> ref_text.
-    """
+
     refs = {}
     with open(text_tsv) as f:
         for lineno, line in enumerate(f, 1):
@@ -120,7 +99,6 @@ def write_manifest_atomically(records: list, output_path: Path) -> None:
     also atomic (replaces the destination if it already exists).
     """
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    # Write to a sibling temp file, then rename
     tmp_fd, tmp_path = tempfile.mkstemp(
         dir=output_path.parent,
         prefix=".tmp_manifest_",
@@ -141,10 +119,6 @@ def write_manifest_atomically(records: list, output_path: Path) -> None:
             pass
         raise
 
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
 
 def main():
     parser = argparse.ArgumentParser(description="Prepare clean manifest with phoneme references.")
@@ -168,11 +142,11 @@ def main():
         log.error("Text reference file not found: %s", text_tsv)
         sys.exit(1)
 
-    # Load references
+    # Loading references
     refs = load_text_references(text_tsv)
     log.info("Loaded %d text references for language '%s'", len(refs), lang)
 
-    # Discover WAV files
+    # Discovering WAV files
     wav_files = sorted(wav_dir.glob("*.wav"))
     if max_utt is not None:
         wav_files = wav_files[:max_utt]
@@ -250,7 +224,7 @@ def main():
     if errors > 0:
         log.warning("%d utterances skipped due to errors", errors)
 
-    # Write manifest atomically
+    # Writing manifest atomically
     output_path = manifest_dir / "clean.jsonl"
     write_manifest_atomically(records, output_path)
     log.info("Done. %d records written, %d skipped.", len(records), errors)

@@ -1,23 +1,5 @@
 #!/usr/bin/env python3
-"""
-generate_dvc_yaml.py
-====================
-Generates the dvc.yaml file programmatically from params.yaml.
 
-This script is the KEY to extending the pipeline to new languages WITHOUT
-modifying any pipeline code: simply add a language to params.yaml, re-run
-this script, then `dvc repro`.
-
-Usage:
-    python generate_dvc_yaml.py --params params.yaml --output dvc.yaml
-
-Why generate dvc.yaml programmatically?
------------------------------------------
-DVC does not (yet) support looping over a parameter list in dvc.yaml natively.
-Generating the YAML from params.yaml keeps the pipeline description in sync
-with the parameter file and ensures DVC can track each stage independently,
-re-running only what changed.
-"""
 
 import argparse
 import os
@@ -42,11 +24,11 @@ def build_dvc_stages(params: dict) -> dict:
     stages = {}
 
     for lang in languages:
-        # ------------------------------------------------------------------
-        # Stage 1: prepare_manifests_{lang}
-        # ------------------------------------------------------------------
+
+        # 1: prepare_manifests_{lang}
+
         stages[f"prepare_manifests_{lang}"] = {
-            "cmd": f"python src/prepare_manifests.py --lang {lang} --params params.yaml",
+            "cmd": f"python3 src/prepare_manifests.py --lang {lang} --params params.yaml",
             "deps": [
                 "src/prepare_manifests.py",
                 f"data/raw/{lang}/wav",
@@ -60,9 +42,8 @@ def build_dvc_stages(params: dict) -> dict:
             ],
         }
 
-        # ------------------------------------------------------------------
-        # Stage 2: add_noise_{lang}
-        # ------------------------------------------------------------------
+        # 2: add_noise_{lang}
+
         noisy_manifests = [
             f"data/manifests/{lang}/noisy_snr_{snr_db}.jsonl"
             for snr_db in snr_levels
@@ -73,7 +54,7 @@ def build_dvc_stages(params: dict) -> dict:
         ]
 
         stages[f"add_noise_{lang}"] = {
-            "cmd": f"python src/add_noise.py --lang {lang} --params params.yaml",
+            "cmd": f"python3 src/add_noise.py --lang {lang} --params params.yaml",
             "deps": [
                 "src/add_noise.py",
                 f"data/manifests/{lang}/clean.jsonl",
@@ -84,12 +65,11 @@ def build_dvc_stages(params: dict) -> dict:
             "outs": noisy_manifests + noisy_audio_dirs,
         }
 
-        # ------------------------------------------------------------------
-        # Stage 3a: predict_clean_{lang}
-        # ------------------------------------------------------------------
+        # 3a: predict_clean_{lang}
+
         stages[f"predict_clean_{lang}"] = {
             "cmd": (
-                f"python src/predict_phonemes.py "
+                f"python3 src/predict_phonemes.py "
                 f"--manifest data/manifests/{lang}/clean.jsonl "
                 f"--output data/predictions/{lang}/clean_pred.jsonl "
                 f"--params params.yaml"
@@ -106,13 +86,13 @@ def build_dvc_stages(params: dict) -> dict:
             ],
         }
 
-        # ------------------------------------------------------------------
-        # Stage 3b: predict_noisy_{lang}_{snr_db}  (one per SNR level)
-        # ------------------------------------------------------------------
+
+        # 3b: predict_noisy_{lang}_{snr_db}  (one per SNR level)
+
         for snr_db in snr_levels:
             stages[f"predict_noisy_{lang}_snr{snr_db}"] = {
                 "cmd": (
-                    f"python src/predict_phonemes.py "
+                    f"python3 src/predict_phonemes.py "
                     f"--manifest data/manifests/{lang}/noisy_snr_{snr_db}.jsonl "
                     f"--output data/predictions/{lang}/noisy_snr_{snr_db}_pred.jsonl "
                     f"--params params.yaml"
@@ -129,12 +109,11 @@ def build_dvc_stages(params: dict) -> dict:
                 ],
             }
 
-        # ------------------------------------------------------------------
-        # Stage 4a: evaluate_clean_{lang}
-        # ------------------------------------------------------------------
+        # 4a: evaluate_clean_{lang}
+
         stages[f"evaluate_clean_{lang}"] = {
             "cmd": (
-                f"python src/evaluate.py "
+                f"python3 src/evaluate.py "
                 f"--manifest data/predictions/{lang}/clean_pred.jsonl "
                 f"--output metrics/{lang}/clean.json "
                 f"--snr null "
@@ -153,13 +132,12 @@ def build_dvc_stages(params: dict) -> dict:
             ],
         }
 
-        # ------------------------------------------------------------------
-        # Stage 4b: evaluate_noisy_{lang}_{snr_db}
-        # ------------------------------------------------------------------
+        # 4b: evaluate_noisy_{lang}_{snr_db}
+
         for snr_db in snr_levels:
             stages[f"evaluate_noisy_{lang}_snr{snr_db}"] = {
                 "cmd": (
-                    f"python src/evaluate.py "
+                    f"python3 src/evaluate.py "
                     f"--manifest data/predictions/{lang}/noisy_snr_{snr_db}_pred.jsonl "
                     f"--output metrics/{lang}/snr_{snr_db}.json "
                     f"--snr {snr_db} "
@@ -178,9 +156,8 @@ def build_dvc_stages(params: dict) -> dict:
                 ],
             }
 
-    # ------------------------------------------------------------------
-    # Stage 5: plot_results (aggregates ALL languages)
-    # ------------------------------------------------------------------
+    # 5: plot_results (all languages)
+
     all_clean_metrics = [f"metrics/{lang}/clean.json" for lang in languages]
     all_noisy_metrics = [
         f"metrics/{lang}/snr_{snr_db}.json"
@@ -189,7 +166,7 @@ def build_dvc_stages(params: dict) -> dict:
     ]
 
     stages["plot_results"] = {
-        "cmd": "python src/plot_results.py --params params.yaml",
+        "cmd": "python3 src/plot_results.py --params params.yaml",
         "deps": [
             "src/plot_results.py",
         ] + all_clean_metrics + all_noisy_metrics,
@@ -222,7 +199,7 @@ def write_dvc_yaml_atomically(stages: dict, output_path: Path) -> None:
         "# ============================================================\n"
         "# dvc.yaml – AUTO-GENERATED by generate_dvc_yaml.py\n"
         "# DO NOT EDIT MANUALLY. Regenerate with:\n"
-        "#   python generate_dvc_yaml.py --params params.yaml\n"
+        "#   python3 generate_dvc_yaml.py --params params.yaml\n"
         "# ============================================================\n\n"
     )
     try:

@@ -1,27 +1,5 @@
 #!/usr/bin/env python3
-"""
-Stage 3 – predict_phonemes
-===========================
-Loads the pre-trained phoneme recognition model
-(facebook/wav2vec2-lv-60-espeak-cv-ft), runs inference on every utterance
-described in an input manifest, and writes a prediction manifest.
 
-The model requires 16 kHz mono audio. Audio that does not already satisfy
-these constraints is resampled/converted before inference.
-
-Usage:
-    python src/predict_phonemes.py \\
-        --manifest data/manifests/en/clean.jsonl \\
-        --output   data/predictions/en/clean_pred.jsonl \\
-        --params   params.yaml
-
-Inputs:
-    - Any manifest (clean or noisy JSONL)
-    - params.yaml
-
-Outputs:
-    - Prediction manifest (input manifest + hyp_phon field) – written atomically
-"""
 
 import argparse
 import json
@@ -46,22 +24,17 @@ log = logging.getLogger("predict_phonemes")
 TARGET_SR = 16_000  # wav2vec2 requires 16 kHz
 
 
-# ---------------------------------------------------------------------------
 # Audio loading with resampling
-# ---------------------------------------------------------------------------
+
 
 def load_audio_16khz(wav_path: str) -> np.ndarray:
-    """
-    Load a WAV file and return a 16 kHz mono float32 array.
-    Resamples if necessary using scipy (pure-Python fallback).
-    """
+
     signal, sr = sf.read(wav_path, dtype="float32", always_2d=False)
 
-    # Downmix to mono if needed
     if signal.ndim == 2:
         signal = signal.mean(axis=1)
 
-    # Resample to 16 kHz if needed
+
     if sr != TARGET_SR:
         try:
             from scipy.signal import resample_poly
@@ -78,9 +51,6 @@ def load_audio_16khz(wav_path: str) -> np.ndarray:
     return signal
 
 
-# ---------------------------------------------------------------------------
-# Manifest I/O
-# ---------------------------------------------------------------------------
 
 def load_manifest(path: Path) -> list:
     records = []
@@ -113,9 +83,7 @@ def write_manifest_atomically(records: list, output_path: Path) -> None:
         raise
 
 
-# ---------------------------------------------------------------------------
 # Inference
-# ---------------------------------------------------------------------------
 
 def load_model_and_processor(model_name: str):
     """Load the wav2vec2 CTC model and its processor."""
@@ -159,9 +127,6 @@ def predict_batch(
     return transcriptions
 
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
 
 def main():
     parser = argparse.ArgumentParser(description="Run phoneme recognition on a manifest.")

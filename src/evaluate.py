@@ -1,31 +1,4 @@
 #!/usr/bin/env python3
-"""
-Stage 4 – evaluate
-===================
-Computes the Phoneme Error Rate (PER) for every utterance in a prediction
-manifest and writes a JSON metrics file.
-
-PER = (S + D + I) / N  where N = number of reference phonemes.
-
-Since each phoneme is a single token (space-separated), this is exactly
-equivalent to the Word Error Rate computed token-by-token, or the CER when
-phonemes are single characters. We use the Levenshtein (edit) distance on
-the phoneme token sequence.
-
-Usage:
-    python src/evaluate.py \\
-        --manifest  data/predictions/en/clean_pred.jsonl \\
-        --output    metrics/en/clean.json \\
-        --snr       null \\
-        --lang      en \\
-        --params    params.yaml
-
-Inputs:
-    - Prediction manifest (JSONL with ref_phon + hyp_phon fields)
-
-Outputs:
-    - JSON metrics file: {lang, snr_db, per_mean, per_std, n_utts, ...}
-"""
 
 import argparse
 import json
@@ -43,10 +16,7 @@ logging.basicConfig(
 )
 log = logging.getLogger("evaluate")
 
-
-# ---------------------------------------------------------------------------
 # PER computation
-# ---------------------------------------------------------------------------
 
 def edit_distance(ref_tokens: list, hyp_tokens: list) -> int:
     """
@@ -55,7 +25,6 @@ def edit_distance(ref_tokens: list, hyp_tokens: list) -> int:
     This is strictly equivalent to CER when phonemes are single characters.
     """
     n, m = len(ref_tokens), len(hyp_tokens)
-    # dp[i][j] = edit distance between ref[:i] and hyp[:j]
     dp = list(range(m + 1))
     for i in range(1, n + 1):
         prev = dp[:]
@@ -81,10 +50,6 @@ def compute_per(ref_phon: str, hyp_phon: str) -> float:
     dist = edit_distance(ref_tokens, hyp_tokens)
     return dist / len(ref_tokens)
 
-
-# ---------------------------------------------------------------------------
-# Manifest I/O
-# ---------------------------------------------------------------------------
 
 def load_manifest(path: Path) -> list:
     records = []
@@ -117,9 +82,6 @@ def write_json_atomically(data: dict, output_path: Path) -> None:
         raise
 
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate phoneme predictions (PER).")

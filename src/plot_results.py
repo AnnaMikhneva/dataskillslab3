@@ -1,25 +1,5 @@
 #!/usr/bin/env python3
-"""
-Stage 5 – plot_results
-=======================
-Aggregates per-SNR metrics for all languages and produces:
-  1. figures/{lang}/per_vs_snr.png  – per-language curve
-  2. figures/cross_language_mean.png – mean PER curve across languages
-  3. metrics/summary.json           – all language × SNR data in one file (DVC metric)
 
-Usage:
-    python src/plot_results.py --params params.yaml
-
-Inputs:
-    - metrics/{lang}/snr_{snr_db}.json  (one per language × SNR)
-    - metrics/{lang}/clean.json         (clean baseline)
-    - params.yaml
-
-Outputs (DVC metrics / plots):
-    - metrics/summary.json
-    - figures/{lang}/per_vs_snr.png
-    - figures/cross_language_mean.png
-"""
 
 import argparse
 import json
@@ -31,7 +11,7 @@ from collections import defaultdict
 from pathlib import Path
 
 import matplotlib
-matplotlib.use("Agg")   # non-interactive backend (safe in headless environments)
+matplotlib.use("Agg")  
 import matplotlib.pyplot as plt
 import yaml
 
@@ -45,10 +25,6 @@ FIGSIZE = (8, 5)
 DPI = 150
 COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"]
 
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
 
 def load_params(path: str) -> dict:
     with open(path) as f:
@@ -101,16 +77,9 @@ def save_figure_atomically(fig, output_path: Path, dpi: int = DPI) -> None:
         raise
 
 
-# ---------------------------------------------------------------------------
-# Data collection
-# ---------------------------------------------------------------------------
 
 def collect_metrics(params: dict) -> dict:
-    """
-    Returns a nested dict:
-      lang -> {snr_db: per_mean, ...}
-    snr_db = None maps to the clean (no-noise) condition.
-    """
+
     metrics_dir = Path(params["data"]["metrics_dir"])
     languages = params["languages"]
     snr_levels = params["noise"]["snr_levels"]
@@ -142,13 +111,9 @@ def collect_metrics(params: dict) -> dict:
     return data
 
 
-# ---------------------------------------------------------------------------
-# Plotting
-# ---------------------------------------------------------------------------
-
 def plot_language(lang: str, lang_data: list, output_path: Path) -> None:
-    """Plot PER vs SNR for a single language with error bands."""
-    # Separate clean from noisy
+
+    # Separating clean from noisy
     noisy = [(snr, per, std) for snr, per, std in lang_data if snr is not None]
     clean = [(snr, per, std) for snr, per, std in lang_data if snr is None]
 
@@ -167,7 +132,7 @@ def plot_language(lang: str, lang_data: list, output_path: Path) -> None:
         color=COLORS[0],
     )
 
-    # Add clean baseline as a horizontal dashed line
+    # Adding clean baseline as a horizontal dashed line
     if clean:
         clean_per = clean[0][1]
         ax.axhline(
@@ -192,9 +157,9 @@ def plot_language(lang: str, lang_data: list, output_path: Path) -> None:
 def plot_cross_language(data: dict, output_path: Path) -> None:
     """
     Plot per-language curves + cross-language mean PER vs SNR.
-    Only SNR levels present in ALL languages are included in the mean.
+    Only SNR levels present in all languages are included in the mean.
     """
-    # Find common SNR levels (excluding clean)
+    # Finding common SNR levels (excluding clean)
     snr_sets = []
     for lang, lang_data in data.items():
         snr_sets.append(set(snr for snr, _, _ in lang_data if snr is not None))
@@ -240,9 +205,6 @@ def plot_cross_language(data: dict, output_path: Path) -> None:
     plt.close(fig)
 
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
 
 def main():
     parser = argparse.ArgumentParser(description="Plot PER vs SNR results.")
@@ -254,7 +216,7 @@ def main():
     figures_dir = Path(params["data"]["figures_dir"])
     metrics_dir = Path(params["data"]["metrics_dir"])
 
-    # Collect all metrics
+    # Collecting all metrics
     data = collect_metrics(params)
 
     if not any(data.values()):
